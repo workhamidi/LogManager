@@ -33,6 +33,8 @@ public class Program
 
     private void TestNormalLog()
     {
+        ApplicationLogConfiguration applicationConfiguration = null!;
+
 
         var builder = Host.CreateDefaultBuilder()
             .UseSerilog()
@@ -44,7 +46,7 @@ public class Program
                     .Build();
 
 
-                var applicationConfiguration = context.Configuration
+                applicationConfiguration = context.Configuration
                     .GetSection(nameof(ApplicationLogConfiguration))
                     .Get<ApplicationLogConfiguration>()!;
 
@@ -57,7 +59,7 @@ public class Program
 
         var log = host.Services.GetService<ILog>()!;
 
-        new Program().Log(log);
+        new Program().Log(log, applicationConfiguration);
 
         host.Run();
 
@@ -65,6 +67,8 @@ public class Program
 
     private void TestQueueLog()
     {
+        ApplicationLogConfiguration applicationConfiguration = null!;
+
 
         var builder = Host.CreateDefaultBuilder()
             .UseSerilog()
@@ -76,7 +80,7 @@ public class Program
                     .Build();
 
 
-                var applicationConfiguration = context.Configuration
+                applicationConfiguration = context.Configuration
                     .GetSection(nameof(ApplicationLogConfiguration))
                     .Get<ApplicationLogConfiguration>()!;
 
@@ -91,14 +95,15 @@ public class Program
 
         var log = host.Services.GetService<ILog>()!;
 
-        new Program().Log(log);
+        new Program().Log(log, applicationConfiguration);
+
 
         host.Run();
 
     }
 
 
-    public void Log(ILog log)
+    public void Log(ILog log, ApplicationLogConfiguration applicationLogConfiguration)
     {
         var methodName = MethodName.GetName();
 
@@ -123,6 +128,16 @@ public class Program
                 new("class name", _className),
                 new("method name", methodName)
             }!, exception);
+
+
+        /************ object to log parameter ************/
+
+        log.Warning("test log",
+            new List<KeyValuePair<string, object?>>()
+            {
+                new("class name", _className),
+                new("method name", methodName)
+            }!.GetParameter(applicationLogConfiguration), exception);
 
 
 
