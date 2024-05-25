@@ -1,4 +1,4 @@
-﻿namespace SerilogLogger.Dto;
+﻿namespace SerilogLogger.Dtos;
 
 public class ApplicationLogConfiguration
 {

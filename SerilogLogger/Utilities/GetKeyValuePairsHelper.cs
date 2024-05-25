@@ -4,27 +4,23 @@ using System.Text.Json.Serialization;
 
 namespace SerilogLogger.Utilities;
 
-public static class ObjectToLogParameter
+public static class GetKeyValuePairsHelper
 {
-    public static List<KeyValuePair<string, object>> GetKeyValuePairs(
-        this object obj,
-        string? baseName = null,
-        bool prettyWriteValue = true
-    )
+    public static List<KeyValuePair<string, object>> GetKeyValuePairs(this object obj, string? baseName = null, bool prettyWriteValue = true)
     {
         baseName ??= obj.GetType().Name;
 
         return GetSerializablePublicMember(obj, baseName, prettyWriteValue);
-
-
     }
 
 
     private static List<KeyValuePair<string, object>> GetKeyValuePairsList(object obj, string baseName, bool prettyWriteValue = true)
     {
-        var jsonString = JsonSerializer.Serialize(obj,
-            new JsonSerializerOptions()
-            { WriteIndented = prettyWriteValue, ReferenceHandler = ReferenceHandler.IgnoreCycles });
+        var jsonString = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+        { 
+            WriteIndented = prettyWriteValue,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        });
 
         var jsonDocument = JsonDocument.Parse(jsonString);
 
@@ -57,13 +53,12 @@ public static class ObjectToLogParameter
                 {
                     new ($"{baseName}", jsonDocument.RootElement.GetString())
                 };
-            
+
             case JsonValueKind.Object:
                 return jsonDocument.RootElement
                     .EnumerateObject()
                     .Select(jsonProperty =>
-                        new KeyValuePair<string,object>($"{baseName}.{jsonProperty.Name}", jsonProperty.Value)
-                    )
+                        new KeyValuePair<string, object>($"{baseName}.{jsonProperty.Name}", jsonProperty.Value))
                     .ToList();
 
             default:
@@ -96,17 +91,17 @@ public static class ObjectToLogParameter
 
                     case MemberTypes.Property:
                         var propertyInfo = (PropertyInfo)memberInfo;
-                       var propertyInfoObject= propertyInfo.GetValue(obj);
+                        var propertyInfoObject = propertyInfo.GetValue(obj);
                         keyValuePairs.AddRange(GetKeyValuePairsList(propertyInfoObject, $"{baseName}.{propertyInfo.Name}"));
                         break;
 
 
-                    /******************This is for using other type if needs.******************/
-                  
-                    //case MethodInfo:
-                    //case EventInfo:
-                    //case ConstructorInfo:
-                    //    continue;
+                        /******************This is for using other type if needs.******************/
+
+                        //case MethodInfo:
+                        //case EventInfo:
+                        //case ConstructorInfo:
+                        //    continue;
                 }
 
             }
@@ -138,8 +133,9 @@ public static class ObjectToLogParameter
 
         return keyValuePairs;
     }
-    
-    public static List<KeyValuePair<string, object>> GetParameter
+
+
+    public static List<KeyValuePair<string, object>> UnionKeyValuePairs
     (
         this List<KeyValuePair<string, object>> firstKeyValuePairs,
         object obj,

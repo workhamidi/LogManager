@@ -1,0 +1,38 @@
+{
+  "Serilog": {
+    "Using": [ "Serilog", "Serilog.Sinks.File", "Serilog.Sinks.Udp" ],
+    "MinimumLevel": "Verbose",
+    "WriteTo": [
+      {
+        "Name": "File",
+        "Args": {
+          "path": "D:\\SelilogLogger\\SerilogTest\\SerilogTest.txt",
+          "outputTemplate": "Time:{Timestamp:yyyy-MM-dd HH:mm:ss.fff} | Level:{Level:u3}{NewLine}Message:{Message}{NewLine}{NewLine}{NewLine}Properties:{Properties:j}{NewLine}{NewLine}{NewLine}Exception:{Exception}{NewLine}{NewLine}",
+          "fileSizeLimitBytes": 268435456, // 256MB (256*2^20)
+          "rollingInterval": "Day",
+          "retainedFileCountLimit": 10,
+          "rollOnFileSizeLimit": true,
+          "RestrictedToMinimumLevel": "Verbose"
+        }
+      },
+      {
+        "Name": "Udp",
+        "Args": {
+          "remoteAddress": "127.0.0.1",
+          "remotePort": 9999,
+          "family": "InterNetwork",
+          "formatter": "SerilogLogger.LogFormatter.ApplicationFormatter.Log4ApplicationFormatter, SerilogLogger",
+          "restrictedToMinimumLevel": "Verbose"
+        }
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName",
+      "WithThreadId",
+      "WithThreadName",
+      "WithProcessName",
+      "WithProcessId"
+    ]
+  }
+}
